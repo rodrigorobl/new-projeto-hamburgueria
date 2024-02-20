@@ -17,19 +17,19 @@ const checkOrderID = (request, response, next) => {
 
     request.menuIndex = index
     request.menuId = id
-    
+
 
     next()
 }
 
 const checkOrderStatus = (request, response, next) => {
-    
+
     console.log(`Método: ${request.method}, URL: ${request.originalUrl}`)
-    
+
     next() // Chama o próximo middleware na cadeia
 }
 
-app.get('/orders', checkOrderStatus,(request, response) => {
+app.get('/orders', checkOrderStatus, (request, response) => {
 
     return response.json(orders)
 })
@@ -57,6 +57,7 @@ app.put('/orders/:id', checkOrderID, checkOrderStatus, (request, response) => {
     orders[index] = updatedOrder
 
     return response.json(updatedOrder)
+
 })
 
 app.delete('/orders/:id', checkOrderID, checkOrderStatus, (request, response) => {
@@ -69,19 +70,35 @@ app.delete('/orders/:id', checkOrderID, checkOrderStatus, (request, response) =>
 
 app.patch('/orders/:id', checkOrderID, checkOrderStatus, (request, response) => {
 
-    const { order, clientName, price } = request.body
     const index = request.menuIndex
     const id = request.menuId
-    const status = "Pronto"
-    
+
+    if (index !== -1) {
+        orders[index].status = "Pronto"
+        response.json({ message: `Status do pedido ${id} alterado para 'Pronto'` })
+    } else {
+        response.status(404).json({ error: `Pedido com ID ${id} não encontrado` })
+    }
 
 
-    const updatedOrder = { id, order, clientName, price, status }
-
-    orders[index] = updatedOrder
-
-    return response.json(updatedOrder)
 })
+
+
+/*
+const { order, clientName, price } = request.body
+const index = request.menuIndex
+const id = request.menuId
+const status = "Pronto"
+ 
+
+
+const updatedOrder = { id, order, clientName, price, status }
+
+orders[index] = updatedOrder
+
+return response.json(updatedOrder)
+})
+*/
 
 app.listen(port, () => {
     console.log(`😎😎😎Server started on port ${port}`)
